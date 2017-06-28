@@ -508,6 +508,11 @@ NSInteger const kIQPreviousNextButtonToolbarTag     =   -1005;
 
 #pragma mark - Private Methods
 
+- (BOOL)isAppExtension
+{
+    return [[NSBundle mainBundle].executablePath rangeOfString:@".appex/"].location != NSNotFound;
+}
+
 /** Getting keyWindow. */
 -(UIWindow *)keyWindow
 {
@@ -519,10 +524,8 @@ NSInteger const kIQPreviousNextButtonToolbarTag     =   -1005;
     {
         static UIWindow *_keyWindow = nil;
         
-        // make extension friendly
-        Class UIApplicationClass = NSClassFromString(@"UIApplication");
-        if (UIApplicationClass && [UIApplicationClass respondsToSelector:@selector(sharedApplication)]) {
-            
+        if(![self isAppExtension]) {
+            // make extension friendly
             UIApplication *application = [UIApplication performSelector:@selector(sharedApplication)];
             
             /*  (Bug ID: #23, #25, #73)   */
@@ -611,15 +614,12 @@ NSInteger const kIQPreviousNextButtonToolbarTag     =   -1005;
     CGSize kbSize = _kbSize;
     kbSize.height += keyboardDistanceFromTextField;
 
-    CGRect statusBarFrame;
+    CGRect statusBarFrame = CGRectMake(0, 0, 320, 20);
     
     // make extension friendly
-    Class UIApplicationClass = NSClassFromString(@"UIApplication");
-    if (UIApplicationClass && [UIApplicationClass respondsToSelector:@selector(sharedApplication)]) {
+    if(![self isAppExtension]) {
         UIApplication *application = [UIApplication performSelector:@selector(sharedApplication)];
         statusBarFrame = [application statusBarFrame];
-    } else {
-        statusBarFrame = CGRectMake(0, 0, 320, 20);
     }
     
     //  (Bug ID: #250)
@@ -2229,9 +2229,7 @@ NSInteger const kIQPreviousNextButtonToolbarTag     =   -1005;
        didEndEditingNotificationName:UITextViewTextDidEndEditingNotification];
     
     // make extension friendly
-    Class UIApplicationClass = NSClassFromString(@"UIApplication");
-    
-    if (UIApplicationClass && [UIApplicationClass respondsToSelector:@selector(sharedApplication)]) {
+    if(![self isAppExtension]) {
         UIApplication *application = [UIApplication performSelector:@selector(sharedApplication)];
         
         //  Registering for orientation changes notification
@@ -2261,11 +2259,9 @@ NSInteger const kIQPreviousNextButtonToolbarTag     =   -1005;
        didEndEditingNotificationName:UITextViewTextDidEndEditingNotification];
     
     // make extension friendly
-    Class UIApplicationClass = NSClassFromString(@"UIApplication");
-    
-    if (UIApplicationClass && [UIApplicationClass respondsToSelector:@selector(sharedApplication)]) {
+    if(![self isAppExtension]) {
         UIApplication *application = [UIApplication performSelector:@selector(sharedApplication)];
-    
+        
         //  Unregistering for orientation changes notification
         [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillChangeStatusBarOrientationNotification object:application];
         
