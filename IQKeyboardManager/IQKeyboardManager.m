@@ -519,14 +519,21 @@ NSInteger const kIQPreviousNextButtonToolbarTag     =   -1005;
     {
         static UIWindow *_keyWindow = nil;
         
-        /*  (Bug ID: #23, #25, #73)   */
-        UIWindow *originalKeyWindow = [[UIApplication sharedApplication] keyWindow];
-        
-        //If original key window is not nil and the cached keywindow is also not original keywindow then changing keywindow.
-        if (originalKeyWindow != nil &&
-            _keyWindow != originalKeyWindow)
-        {
-            _keyWindow = originalKeyWindow;
+        // make extension friendly
+        Class UIApplicationClass = NSClassFromString(@"UIApplication");
+        if (UIApplicationClass && [UIApplicationClass respondsToSelector:@selector(sharedApplication)]) {
+            
+            UIApplication *application = [UIApplication performSelector:@selector(sharedApplication)];
+            
+            /*  (Bug ID: #23, #25, #73)   */
+            UIWindow *originalKeyWindow = [application keyWindow];
+            
+            //If original key window is not nil and the cached keywindow is also not original keywindow then changing keywindow.
+            if (originalKeyWindow != nil &&
+                _keyWindow != originalKeyWindow)
+            {
+                _keyWindow = originalKeyWindow;
+            }
         }
         
         return _keyWindow;
@@ -604,7 +611,16 @@ NSInteger const kIQPreviousNextButtonToolbarTag     =   -1005;
     CGSize kbSize = _kbSize;
     kbSize.height += keyboardDistanceFromTextField;
 
-    CGRect statusBarFrame = [[UIApplication sharedApplication] statusBarFrame];
+    CGRect statusBarFrame;
+    
+    // make extension friendly
+    Class UIApplicationClass = NSClassFromString(@"UIApplication");
+    if (UIApplicationClass && [UIApplicationClass respondsToSelector:@selector(sharedApplication)]) {
+        UIApplication *application = [UIApplication performSelector:@selector(sharedApplication)];
+        statusBarFrame = [application statusBarFrame];
+    } else {
+        statusBarFrame = CGRectMake(0, 0, 320, 20);
+    }
     
     //  (Bug ID: #250)
     IQLayoutGuidePosition layoutGuidePosition = IQLayoutGuidePositionNone;
@@ -2212,11 +2228,18 @@ NSInteger const kIQPreviousNextButtonToolbarTag     =   -1005;
      didBeginEditingNotificationName:UITextViewTextDidBeginEditingNotification
        didEndEditingNotificationName:UITextViewTextDidEndEditingNotification];
     
-    //  Registering for orientation changes notification
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willChangeStatusBarOrientation:) name:UIApplicationWillChangeStatusBarOrientationNotification object:[UIApplication sharedApplication]];
+    // make extension friendly
+    Class UIApplicationClass = NSClassFromString(@"UIApplication");
     
-    //  Registering for status bar frame change notification
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didChangeStatusBarFrame:) name:UIApplicationDidChangeStatusBarFrameNotification object:[UIApplication sharedApplication]];
+    if (UIApplicationClass && [UIApplicationClass respondsToSelector:@selector(sharedApplication)]) {
+        UIApplication *application = [UIApplication performSelector:@selector(sharedApplication)];
+        
+        //  Registering for orientation changes notification
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willChangeStatusBarOrientation:) name:UIApplicationWillChangeStatusBarOrientationNotification object:application];
+        
+        //  Registering for status bar frame change notification
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didChangeStatusBarFrame:) name:UIApplicationDidChangeStatusBarFrameNotification object:application];
+    }
 }
 
 -(void)unregisterAllNotifications
@@ -2237,11 +2260,18 @@ NSInteger const kIQPreviousNextButtonToolbarTag     =   -1005;
      didBeginEditingNotificationName:UITextViewTextDidBeginEditingNotification
        didEndEditingNotificationName:UITextViewTextDidEndEditingNotification];
     
-    //  Unregistering for orientation changes notification
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillChangeStatusBarOrientationNotification object:[UIApplication sharedApplication]];
+    // make extension friendly
+    Class UIApplicationClass = NSClassFromString(@"UIApplication");
     
-    //  Unregistering for status bar frame change notification
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidChangeStatusBarFrameNotification object:[UIApplication sharedApplication]];
+    if (UIApplicationClass && [UIApplicationClass respondsToSelector:@selector(sharedApplication)]) {
+        UIApplication *application = [UIApplication performSelector:@selector(sharedApplication)];
+    
+        //  Unregistering for orientation changes notification
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillChangeStatusBarOrientationNotification object:application];
+        
+        //  Unregistering for status bar frame change notification
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidChangeStatusBarFrameNotification object:application];
+    }
 }
 
 -(void)showLog:(NSString*)logString
