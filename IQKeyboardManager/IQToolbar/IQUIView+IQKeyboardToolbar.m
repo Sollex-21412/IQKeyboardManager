@@ -48,7 +48,9 @@
         
         if (keyboardToolbar == nil)
         {
-            keyboardToolbar = [[IQToolbar alloc] init];
+            CGRect frame = CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, 44);
+
+            keyboardToolbar = [[IQToolbar alloc] initWithFrame:frame];
             
             objc_setAssociatedObject(self, @selector(keyboardToolbar), keyboardToolbar, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         }
